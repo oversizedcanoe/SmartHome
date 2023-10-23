@@ -1,0 +1,38 @@
+﻿@page "/fetchdata"
+
+<PageTitle>Weather forecast</PageTitle>
+
+@using SmartHome.Connection.Interfaces;
+@inject ISmartDeviceService SmartDeviceService
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (Loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @foreach(var device in SmartDevices)
+    {
+        <p>(@device.Alias) is on : (@device.On)</p>
+    }
+}
+
+@code {
+    bool Loading = true;
+    List<ISmartDevice> SmartDevices = new();
+    protected override async Task OnInitializedAsync()
+    {
+        await DoStuff();
+        this.Loading = false;
+    }
+
+    private async Task DoStuff()
+    {
+        await this.SmartDeviceService.DiscoverDevices();
+        this.SmartDevices = this.SmartDeviceService.AvailableDevices;
+    }
+}
