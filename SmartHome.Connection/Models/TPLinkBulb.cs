@@ -43,7 +43,7 @@ namespace SmartHome.Connection.Models
         }
 
         public bool IsColorTemp => this._bulb.PoweredOn;
-        public int MinColorTemp => 2700; // TODO Get from dict or programmatically
+        public int MinColorTemp => 2500; // TODO Get from dict or programmatically
         public int MaxColorTemp => 6500; // TODO Get from dict or programmatically
         public int ColorTemp
         {

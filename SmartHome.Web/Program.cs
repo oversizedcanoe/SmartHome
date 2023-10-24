@@ -5,7 +5,7 @@ namespace SmartHome.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -22,13 +22,16 @@ namespace SmartHome.Web
                 app.UseExceptionHandler("/Error");
             }
 
-
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
+
+            ISmartDeviceService smartDeviceService = app.Services.GetRequiredService<ISmartDeviceService>();
+            
+            await smartDeviceService.DiscoverDevices();
 
             app.Run();
         }

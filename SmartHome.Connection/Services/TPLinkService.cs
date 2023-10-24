@@ -12,6 +12,8 @@ namespace SmartHome.Connection.Services
 
         public async Task DiscoverDevices()
         {
+            this.AvailableDevices.Clear();
+
             List<TPLinkSmartDevice> discoveredDevices = await new TPLinkSmartDevices.TPLinkDiscovery().Discover();
 
             foreach (var device in discoveredDevices)
@@ -33,6 +35,5 @@ namespace SmartHome.Connection.Services
 
             throw new Exception($"Unsupported {nameof(TPLinkSmartDevice)}, only Bulb and Plug types supported");
         }
-
     }
 }

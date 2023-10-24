@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Connection", "SmartHome.Connection\SmartHome.Connection.csproj", "{5CF36A52-68B0-49B2-8490-A87761AF4CB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartHome.Connection", "SmartHome.Connection\SmartHome.Connection.csproj", "{5CF36A52-68B0-49B2-8490-A87761AF4CB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Web", "SmartHome.Web\SmartHome.Web.csproj", "{D2DBCBA1-8B7C-4D51-AD0C-F8488066630B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartHome.Web", "SmartHome.Web\SmartHome.Web.csproj", "{D2DBCBA1-8B7C-4D51-AD0C-F8488066630B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
