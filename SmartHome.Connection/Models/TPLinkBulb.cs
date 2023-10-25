@@ -42,7 +42,7 @@ namespace SmartHome.Connection.Models
             }
         }
 
-        public bool IsColorTemp => this._bulb.PoweredOn;
+        public bool IsColorTemp => this._bulb.IsVariableColorTemperature;
         public int MinColorTemp => 2500; // TODO Get from dict or programmatically
         public int MaxColorTemp => 6500; // TODO Get from dict or programmatically
         public int ColorTemp
@@ -87,12 +87,43 @@ namespace SmartHome.Connection.Models
 
         private Color BulbHSVToColor(BulbHSV bulbHSV)
         {
-            return Color.Blue; // Todo
+            // Thanks to https://stackoverflow.com/a/1626232 
+
+            decimal hue = bulbHSV.Hue;
+            // The BulbHSV Saturation ranges from 0-100. Need it to be 0-1.
+            decimal saturation = Decimal.Divide(bulbHSV.Saturation, 100);
+            // The "BulbHSV" value ranges from 0-255. Need it to be 0-1.
+            decimal value = Decimal.Divide(bulbHSV.Value, 255);
+
+            int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
+            decimal f = hue / 60 - Math.Floor(hue / 60);
+
+            value = value * 255;
+            int v = Convert.ToInt32(value);
+            int p = Convert.ToInt32(value * (1 - saturation));
+            int q = Convert.ToInt32(value * (1 - f * saturation));
+            int t = Convert.ToInt32(value * (1 - (1 - f) * saturation));
+
+            switch (hi)
+            {
+                case 0:
+                    return Color.FromArgb(255, v, t, p);
+                case 1:
+                    return Color.FromArgb(255, q, v, p);
+                case 2:
+                    return Color.FromArgb(255, p, v, t);
+                case 3:
+                    return Color.FromArgb(255, p, q, v);
+                case 4:
+                    return Color.FromArgb(255, t, p, v);
+                default:
+                    return Color.FromArgb(255, v, p, q);
+            }
         }
 
         private BulbHSV ColorToBulbHSV(Color color)
         {
-            // Thanks to https://stackoverflow.com/a/1626232
+            // Thanks to https://stackoverflow.com/a/1626232 
 
             int max = Math.Max(color.R, Math.Max(color.G, color.B));
             int min = Math.Min(color.R, Math.Min(color.G, color.B));

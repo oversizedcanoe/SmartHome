@@ -1,0 +1,18 @@
+﻿@using SmartHome.Connection.Interfaces;
+
+@if (_poweredOn)
+{
+    <p>⌚: @SmartPlug?.OnSince.ToShortTimeString()</p> @*Doesn't update properly after turning on*@
+}
+
+@code {
+    [Parameter]
+    public ISmartPlug SmartPlug { get; set; }
+    
+    private bool _poweredOn => SmartPlug.On;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+}

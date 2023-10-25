@@ -1,0 +1,52 @@
+﻿@using SmartHome.Connection.Interfaces;
+@using System.Drawing;
+
+@if (_poweredOn)
+{
+    <p>😎: @(SmartBulb.Brightness)%</p>
+    <input type="range" @bind="@SmartBulb.Brightness" class="form-range" min="0" max="100" @bind:event="oninput">
+
+    <p>🎨: @GetColorName()</p>
+}
+
+@code {
+    [Parameter]
+    public ISmartBulb SmartBulb { get; set; }
+
+    private bool _poweredOn => SmartBulb.On;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private string GetColorName()
+    {
+        string colorName = string.Empty;
+
+        var colors = Enum.GetValues(typeof(KnownColor))
+                        .Cast<KnownColor>()
+                        .Select(Color.FromKnownColor);
+
+        var closest = colors.Aggregate(Color.Black,
+                        (accu, curr) =>
+                        ColorDiff(SmartBulb.Color, curr) < ColorDiff(SmartBulb.Color, accu) ? curr : accu);
+        
+        //if (SmartBulb.Color.IsNamedColor)
+        //{
+        //    colorName = SmartBulb.Color.Name;
+        //}
+        //else
+        //{
+        //    colorName = 
+        //}
+
+        return closest.Name + $" (RGB[{SmartBulb.Color.R}, {SmartBulb.Color.G}, {SmartBulb.Color.B}])";
+    }
+
+    private int ColorDiff(Color color, Color curr)
+    {
+        return Math.Abs(color.R - curr.R) + Math.Abs(color.G - curr.G) + Math.Abs(color.B - curr.B);
+    }
+
+}

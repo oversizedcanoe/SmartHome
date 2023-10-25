@@ -1,35 +1,22 @@
 ﻿@using SmartHome.Connection.Interfaces;
-<div class="card" style="width: 100%; max-width: 25rem" @onclick="TogglePower">
+<div class="card" style="width: 100%; max-width: 25rem; background-color:rgb(@GetRGB())">
   <div class="card-body">
-    <h5 class="card-title">@(_isBulb ? "💡" : "🔌") @SmartDevice.Alias</h5>
+    <h5 class="card-title" @onclick="TogglePower">@(_isBulb ? "💡" : "🔌") @SmartDevice.Alias</h5>
     <p class="card-text">Model: @SmartDevice.Model.Replace("(US)", string.Empty)</p>
-        @if (_isPlug)
-        {
-            @if (_poweredOn)
-            {
-                <p>⌚: @SmartPlug?.OnSince.ToShortTimeString()</p> @*Doesn't update properly after turning on*@
-            }
-        }
-        else if (_isBulb)
-        {
-            @if (_poweredOn)
-            {
-                <p>😎: @(SmartBulb?.Brightness)%</p>
-                <p>🔥: @(SmartBulb?.ColorTemp)k</p>
-                <p>🎨: @SmartBulb?.Color</p>
-            }
-        }
-    </div>
+    @if (_isPlug)
+    {
+        <SmartPlugControl SmartPlug="SmartDevice as ISmartPlug" ></SmartPlugControl>
+    }
+    else if (_isBulb)
+    {
+        <SmartBulbControl SmartBulb="SmartDevice as ISmartBulb"></SmartBulbControl>
+    }
+  </div>
 </div>
 
 @code {
-    // TODO need to split this into two razor components
-
     private bool _isBulb => SmartDevice is ISmartBulb;
     private bool _isPlug => SmartDevice is ISmartPlug;
-
-    private ISmartBulb? SmartBulb => _isBulb ? SmartDevice as ISmartBulb : throw new Exception("Device is not a bulb");
-    private ISmartPlug? SmartPlug => _isPlug ? SmartDevice as ISmartPlug : throw new Exception("Device is not a plug");
 
     private bool _poweredOn => SmartDevice.On;
 
@@ -44,5 +31,19 @@
     private void TogglePower()
     {
         SmartDevice.On = !SmartDevice.On;
+    }
+
+    private string GetRGB()
+    {
+        // Default to white
+        string rgb = "255,255,255";
+
+        if (_isBulb)
+        {
+            ISmartBulb smartBulb = SmartDevice as ISmartBulb;
+            rgb = $"{smartBulb.Color.R},{smartBulb.Color.G},{smartBulb.Color.B}";
+        }
+
+        return rgb;
     }
 }
