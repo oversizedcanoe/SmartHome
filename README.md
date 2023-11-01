@@ -8,3 +8,11 @@ Functionality I would like to have:
 - Turn plugs and lights on and off
 - Set color and brightness of lights, if able to (UI should prevent user from setting if the light does not support it)
 - Preset modes such as Lavalamp mode (light color gradually shifts) and Rave mode (lights quickly flash random colors)
+
+---
+
+### Todo
+- Get color conversion properly working for KL125 lights
+- Get color setting working from app
+- Figure out how to remove delay from light transitions
+- Implement better on/off functionality and display
