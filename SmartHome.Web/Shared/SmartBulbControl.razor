@@ -1,12 +1,18 @@
 ﻿@using SmartHome.Connection.Interfaces;
 @using System.Drawing;
+@using SmartHome.Connection.Models;
 
 @if (_poweredOn)
 {
     <p>😎: @(SmartBulb.Brightness)%</p>
     <input type="range" @bind="@SmartBulb.Brightness" class="form-range" min="0" max="100" @bind:event="oninput">
 
-    <p>🎨: @GetColorName()</p>
+    <input type="range" @bind="@Hue" class="form-range" min="0" max="360" @bind:event="oninput">
+    /* This lags quite a bit; maybe shouldn't use a range for this as blazor has to send a message every movement */
+
+    <p>@((SmartBulb as TPLinkBulb)._bulbH)</p>
+    <p>@((SmartBulb as TPLinkBulb)._bulbS)</p>
+    <p>@((SmartBulb as TPLinkBulb)._bulbV)</p>
 }
 
 @code {
@@ -18,35 +24,23 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        _hue = SmartBulb.Hue;
     }
 
-    private string GetColorName()
+    private int _hue;
+    private int Hue
     {
-        string colorName = string.Empty;
-
-        var colors = Enum.GetValues(typeof(KnownColor))
-                        .Cast<KnownColor>()
-                        .Select(Color.FromKnownColor);
-
-        var closest = colors.Aggregate(Color.Black,
-                        (accu, curr) =>
-                        ColorDiff(SmartBulb.Color, curr) < ColorDiff(SmartBulb.Color, accu) ? curr : accu);
-        
-        //if (SmartBulb.Color.IsNamedColor)
-        //{
-        //    colorName = SmartBulb.Color.Name;
-        //}
-        //else
-        //{
-        //    colorName = 
-        //}
-
-        return closest.Name + $" (RGB[{SmartBulb.Color.R}, {SmartBulb.Color.G}, {SmartBulb.Color.B}])";
+        get => _hue;
+        set
+        {
+            _hue = value;
+            OnColorChange();
+        }
     }
 
-    private int ColorDiff(Color color, Color curr)
+    private void OnColorChange()
     {
-        return Math.Abs(color.R - curr.R) + Math.Abs(color.G - curr.G) + Math.Abs(color.B - curr.B);
+        SmartBulb.Hue = _hue;
+        StateHasChanged(); // TODO Try without this call
     }
-
 }

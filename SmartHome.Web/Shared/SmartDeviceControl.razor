@@ -41,7 +41,8 @@
         if (_isBulb)
         {
             ISmartBulb smartBulb = SmartDevice as ISmartBulb;
-            rgb = $"{smartBulb.Color.R},{smartBulb.Color.G},{smartBulb.Color.B}";
+            int hue = smartBulb.Hue;
+            // TODO Get RGB from Hue
         }
 
         return rgb;

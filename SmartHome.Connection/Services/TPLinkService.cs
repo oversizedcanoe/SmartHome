@@ -1,5 +1,6 @@
-﻿using SmartHome.Connection.Interfaces;
+﻿ using SmartHome.Connection.Interfaces;
 using SmartHome.Connection.Models;
+using TPLinkSmartDevices.Messaging;
 using TPLinkSmartBulb =  TPLinkSmartDevices.Devices.TPLinkSmartBulb;
 using TPLinkSmartDevice = TPLinkSmartDevices.Devices.TPLinkSmartDevice;
 using TPLinkSmartPlug = TPLinkSmartDevices.Devices.TPLinkSmartPlug;
@@ -18,6 +19,7 @@ namespace SmartHome.Connection.Services
 
             foreach (var device in discoveredDevices)
             {
+                device.MessageCache = new NoMessageCache();
                 this.AvailableDevices.Add(MapToSmartDevice(device));
             }
         }

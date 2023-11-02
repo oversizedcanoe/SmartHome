@@ -19,7 +19,7 @@ namespace SmartHome.Connection.Models
             }
             set
             {
-                this._plug.Alias = value;
+                this._plug.SetAlias(value);
             }
         }
 
@@ -34,7 +34,7 @@ namespace SmartHome.Connection.Models
             }
             set
             {
-                this._plug.OutletPowered = value;
+                this._plug.SetPoweredOn(value);
             }
         }
 
