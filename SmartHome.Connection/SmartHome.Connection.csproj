@@ -8,7 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="tplink-smartdevices" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="tplink-smartdevices">
+      <HintPath>..\..\..\repo_clones\tplink-smartdevices-netstandard\tplink-smartdevices\bin\Debug\netstandard2.0\tplink-smartdevices.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

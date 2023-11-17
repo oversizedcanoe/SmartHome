@@ -1,24 +1,43 @@
 ﻿@using SmartHome.Connection.Interfaces;
-<div class="card" style="width: 100%; max-width: 25rem; background-color:rgb(@GetRGB())">
-  <div class="card-body">
-    <h5 class="card-title" @onclick="TogglePower">@(_isBulb ? "💡" : "🔌") @SmartDevice.Alias</h5>
-    <p class="card-text">Model: @SmartDevice.Model.Replace("(US)", string.Empty)</p>
-    @if (_isPlug)
-    {
-        <SmartPlugControl SmartPlug="SmartDevice as ISmartPlug" ></SmartPlugControl>
-    }
-    else if (_isBulb)
-    {
-        <SmartBulbControl SmartBulb="SmartDevice as ISmartBulb"></SmartBulbControl>
-    }
-  </div>
+@using SmartHome.Connection.Services;
+@inject DelayService _delayService;
+
+<div class="card" style="width: 100%; max-width: 25rem;">
+    <div class="card-body">
+
+        <h5 class="card-title"> @(_isBulb ? "💡" : "🔌") @SmartDevice.Alias (<i>@SmartDevice.Model.Replace("(US)", string.Empty)</i>)</h5>
+        <code>@SmartDevice.IPAddress</code>
+
+        <hr />
+        @if (_isPlug)
+        {
+            <SmartPlugControl SmartPlug="SmartDevice as ISmartPlug"></SmartPlugControl>
+        }
+        else if (_isBulb)
+        {
+            <SmartBulbControl SmartBulb="SmartDevice as ISmartBulb"></SmartBulbControl>
+        }
+        <button type="button" class="btn col-12 @(_poweredOn ? "btn-warning" : "btn-dark")" @onclick="TogglePower">@(_poweredOn ? "Turn Off" : "Turn On")</button>
+    </div>
 </div>
 
 @code {
     private bool _isBulb => SmartDevice is ISmartBulb;
     private bool _isPlug => SmartDevice is ISmartPlug;
 
-    private bool _poweredOn => SmartDevice.On;
+
+    private bool _poweredOn;
+
+    public bool PoweredOn
+    {
+        get  => _poweredOn;
+        set 
+        {
+            SmartDevice.On = value;
+            _delayService.WaitForDeviceToUpdate();
+            _poweredOn = value; 
+        }
+    }
 
     [Parameter]
     public ISmartDevice SmartDevice { get; set; }
@@ -26,25 +45,11 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        PoweredOn = SmartDevice.On;
     }
 
     private void TogglePower()
     {
-        SmartDevice.On = !SmartDevice.On;
-    }
-
-    private string GetRGB()
-    {
-        // Default to white
-        string rgb = "255,255,255";
-
-        if (_isBulb)
-        {
-            ISmartBulb smartBulb = SmartDevice as ISmartBulb;
-            int hue = smartBulb.Hue;
-            // TODO Get RGB from Hue
-        }
-
-        return rgb;
+        PoweredOn = !PoweredOn;
     }
 }

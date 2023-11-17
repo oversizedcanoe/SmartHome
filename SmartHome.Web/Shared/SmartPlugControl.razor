@@ -1,18 +1,37 @@
 ﻿@using SmartHome.Connection.Interfaces;
+@using SmartHome.Connection.Services;
+@inject DelayService _delayService;
 
-@if (_poweredOn)
+<h5>On Since</h5>
+@if (SmartPlug.On)
 {
-    <p>⌚: @SmartPlug?.OnSince.ToShortTimeString()</p> @*Doesn't update properly after turning on*@
+    <p>@_onSince</p>
+
+}
+else
+{
+    <p> -- </p>
 }
 
 @code {
     [Parameter]
     public ISmartPlug SmartPlug { get; set; }
-    
-    private bool _poweredOn => SmartPlug.On;
+
+    private string _onSince;
 
     protected override void OnInitialized()
     {
+        _onSince = SmartPlug.OnSince.ToLongTimeString();
+
+        Timer timer = new Timer(UpdateOnSince, null, 0, 2000);
+
         base.OnInitialized();
+    }
+
+    private void UpdateOnSince(object? state)
+    {
+        _onSince = SmartPlug.OnSince.ToLongTimeString();
+        SmartPlug.RefreshAsync().Wait();
+        InvokeAsync(StateHasChanged);
     }
 }

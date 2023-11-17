@@ -34,6 +34,8 @@ namespace SmartHome.Connection.Models
 
         public string Model => this._bulb.Model;
         public string Description => ""; // TODO
+        public string IPAddress => this._bulb.Hostname;
+        public string MACAddress => this._bulb.MacAddress;
 
         public bool On 
         {
@@ -44,7 +46,15 @@ namespace SmartHome.Connection.Models
             set
             {
                 this._bulb.SetPoweredOn(value);
+                OnPowerStateChanged?.Invoke(this, EventArgs.Empty);
             }
+        }
+
+        public event EventHandler OnPowerStateChanged;
+
+        public async Task RefreshAsync()
+        {
+            await this._bulb.Refresh();
         }
 
         public bool IsColorTemp => this._bulb.IsVariableColorTemperature;
@@ -64,6 +74,8 @@ namespace SmartHome.Connection.Models
         }
 
         public bool IsDimmable => this._bulb.IsDimmable;
+
+
         public int Brightness
         {
             get

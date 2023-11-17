@@ -25,6 +25,8 @@ namespace SmartHome.Connection.Models
 
         public string Model => this._plug.Model;
         public string Description => ""; // TODO
+        public string IPAddress => this._plug.Hostname;
+        public string MACAddress => this._plug.MacAddress;
 
         public bool On
         {
@@ -35,10 +37,24 @@ namespace SmartHome.Connection.Models
             set
             {
                 this._plug.SetPoweredOn(value);
+                OnPowerStateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public DateTime OnSince => this._plug.PoweredOnSince;
+        public DateTime OnSince
+        {
+            get
+            {
+                return this._plug.PoweredOnSince;
+            }
+        }
+
+        public event EventHandler OnPowerStateChanged;
+
+        public async Task RefreshAsync()
+        {
+            await this._plug.Refresh();
+        }
 
     }
 }

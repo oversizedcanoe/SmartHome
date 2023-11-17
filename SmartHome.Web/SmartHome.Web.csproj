@@ -14,4 +14,10 @@
     <Folder Include="Data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="TPLinkSmartDevices">
+      <HintPath>..\..\..\repo_clones\TPLinkSmartDevices\TPLinkSmartDevice.NETCore\bin\Debug\netstandard2.1\TPLinkSmartDevices.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

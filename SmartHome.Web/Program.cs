@@ -13,6 +13,7 @@ namespace SmartHome.Web
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddSingleton<ISmartDeviceService, TPLinkService>();
+            builder.Services.AddSingleton<DelayService>();
 
             var app = builder.Build();
 

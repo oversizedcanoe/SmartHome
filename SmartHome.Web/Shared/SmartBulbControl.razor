@@ -1,19 +1,34 @@
 ﻿@using SmartHome.Connection.Interfaces;
 @using System.Drawing;
 @using SmartHome.Connection.Models;
+@using SmartHome.Connection.Services;
+@inject DelayService _delayService;
 
-@if (_poweredOn)
-{
-    <p>😎: @(SmartBulb.Brightness)%</p>
-    <input type="range" @bind="@SmartBulb.Brightness" class="form-range" min="0" max="100" @bind:event="oninput">
+<h5>Brightness</h5>
+<div style="text-align: center">
+    <button type="button" class="btn btn-primary btn-sm" @onclick="() => ChangeBrightness(-25)">
+        <span class="oi oi-minus" aria-hidden="true"></span>
+        <span class="oi oi-minus" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="btn btn-primary btn-sm" @onclick="() => ChangeBrightness(-5)">
+        <span class="oi oi-minus" aria-hidden="true"></span>
+    </button>
+    <span>@(_brightness)%</span>
+    <button type="button" class="btn btn-primary btn-sm" @onclick="() => ChangeBrightness(5)">
+        <span class="oi oi-plus" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="btn btn-primary btn-sm" @onclick="() => ChangeBrightness(25)">
+        <span class="oi oi-plus" aria-hidden="true"></span>
+        <span class="oi oi-plus" aria-hidden="true"></span>
+    </button>
+</div>
 
-    <input type="range" @bind="@Hue" class="form-range" min="0" max="360" @bind:event="oninput">
-    /* This lags quite a bit; maybe shouldn't use a range for this as blazor has to send a message every movement */
+<hr />
+<h5>Color</h5>
+<div style="height: 2rem; width:100%; background-color:hsl(@Hue, 100%, 50%)"></div>
+<input type="range" @bind="@Hue" class="form-range" min="0" max="360" @bind:event="oninput">
+<hr />
 
-    <p>@((SmartBulb as TPLinkBulb)._bulbH)</p>
-    <p>@((SmartBulb as TPLinkBulb)._bulbS)</p>
-    <p>@((SmartBulb as TPLinkBulb)._bulbV)</p>
-}
 
 @code {
     [Parameter]
@@ -21,26 +36,69 @@
 
     private bool _poweredOn => SmartBulb.On;
 
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
         _hue = SmartBulb.Hue;
+        _brightness = SmartBulb.Brightness;
+    }
+
+    void ChangeHue(ChangeEventArgs e)
+    {
+
     }
 
     private int _hue;
+
     private int Hue
     {
-        get => _hue;
+        get
+        {
+            return _hue;
+        }
         set
         {
+            this.SmartBulb.Hue = value;
+            _delayService.WaitForDeviceToUpdate();
             _hue = value;
-            OnColorChange();
         }
     }
 
     private void OnColorChange()
     {
         SmartBulb.Hue = _hue;
-        StateHasChanged(); // TODO Try without this call
+    }
+
+    private int _brightness { get; set; }
+
+    private void ChangeBrightness(int amount)
+    {
+        if (amount > 0)
+        {
+            if (SmartBulb.Brightness + amount <= 100)
+            {
+                SmartBulb.Brightness += amount;
+            }
+            else
+            {
+                SmartBulb.Brightness = 100;
+            }
+        }
+        else
+        {
+            if (SmartBulb.Brightness + amount >= 0)
+            {
+                SmartBulb.Brightness += amount;
+            }
+            else
+            {
+                SmartBulb.Brightness = 0;
+            }
+        }
+
+        _delayService.WaitForDeviceToUpdate();
+
+        _brightness = SmartBulb.Brightness;
     }
 }
