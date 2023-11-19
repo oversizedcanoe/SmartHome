@@ -9,6 +9,8 @@ Functionality I would like to have:
 - Scheduling (i.e. turn this plug on at 10pm every day)
 - Wi-fi Monitoring. I would like to somehow use my [python network monitor repo](https://github.com/oversizedcanoe/NetworkMonitor), running on a raspberry pi, and maybe something like MQTT to subscribe to new devices connected?
     - I could even use my [CSV to model repo](https://github.com/oversizedcanoe/CsvToModel) to store device info in CSV (such as a friendly name for a given connected MAC Address, last connected time etc.). A DB is propbably more appropriate, but it would be cool to use my own code.
+- Change light color based on a currently playing song, or to the beat of a song
+
 ---
 
 ### Todo

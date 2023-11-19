@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using SmartHome.Connection.Interfaces;
+using SmartHome.Connection.Services;
 using System.Drawing;
 using TPLinkSmartDevices.Data;
 using static TPLinkSmartDevices.Devices.TPLinkSmartBulb;
@@ -98,6 +99,7 @@ namespace SmartHome.Connection.Models
             }
             set
             {
+                Console.WriteLine(value);
                 BulbHSV desiredHSV = new BulbHSV()
                 {
                     Hue = value,
@@ -105,7 +107,7 @@ namespace SmartHome.Connection.Models
                     Value = 255
                 };
 
-                this._bulb.SetHSV(desiredHSV);
+                this._bulb.SetHSV(desiredHSV, Configuration.HUE_CHANGE_TRANSITION_TIME_MS);
             }
         }
     }
