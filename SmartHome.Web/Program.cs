@@ -14,6 +14,7 @@ namespace SmartHome.Web
             builder.Services.AddServerSideBlazor();
             builder.Services.AddSingleton<ISmartDeviceService, TPLinkService>();
             builder.Services.AddSingleton<DelayService>();
+            builder.Services.AddSingleton<ModeService>();
 
             var app = builder.Build();
 
