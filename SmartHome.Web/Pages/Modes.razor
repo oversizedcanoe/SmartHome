@@ -2,46 +2,79 @@
 
 @using SmartHome.Connection.Interfaces;
 @using SmartHome.Connection.Services;
+@using static SmartHome.Connection.Services.ModeService;
 @inject ModeService _modeService
 @inject ISmartDeviceService _smartDeviceService;
 
 <PageTitle>Modes</PageTitle>
 
 <h1>Modes</h1>
+<p style="font-style:italic">Current: <b>@this._modeService.CurrentMode</b></p>
+<hr />
 
-<p>This component demonstrates fetching data from a service.</p>
+<h5>Devices</h5>
+<div class="list-group col-lg-3 pb-3">
 
-<button @onclick="StartLavaLampMode">Start Lava Lamp Mode</button>
-<button @onclick="StopLavaLampMode">Stop Lava Lamp Mode</button>
+    @foreach (var bulb in this._availableBulbs)
+    {
+        <label class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" @bind="_bulbSelection[this._availableBulbs.IndexOf(bulb)]">
+            @bulb.Alias
+        </label>
+    }
+</div>
 
-
-<input type="number" @bind-value="step" />
-<input type="number" @bind-value="delay" />
+<button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Lavalamp)">Lava Lamp Mode</button>
+<button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Rave)">Rave Mode</button>
 
 @code {
-    private CancellationTokenSource cancellationTokenSource;
+    private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
     private CancellationToken cancellationToken;
 
-    private int step = 20;
-    private int delay = 1000;
+    private List<ISmartBulb> _availableBulbs = new List<ISmartBulb>();
+    private List<bool> _bulbSelection = new List<bool>();
 
     protected override void OnInitialized()
     {
+        this._availableBulbs = this._smartDeviceService.AvailableDevices.Where(ad => ad is ISmartBulb)
+                                                                        .OrderBy(ad => ad.Alias)
+                                                                        .Select(ad => ad as ISmartBulb).ToList();
+
+        this._availableBulbs.ForEach(b => this._bulbSelection.Add(true));
+
         base.OnInitialized();
     }
 
-    void StartLavaLampMode()
+    void ToggleMode(Mode mode)
     {
+        // Save this to a variable as requesting the cancellation token will reset CurrentMode
+        bool currentModeToggledOff = this._modeService.CurrentMode == mode;
+
+        // Request cancel anytime this method is pressed to stop any active running modes when a new one is started.
+        if (this.cancellationTokenSource?.IsCancellationRequested == false)
+        {
+            this.cancellationTokenSource?.Cancel();
+        }
+
+        // User has pressed the same button as the running mode. Return as the token was cancelled above.
+        if (currentModeToggledOff)
+        {
+            return;
+        }
+
         this.cancellationTokenSource = new CancellationTokenSource();
         this.cancellationToken = this.cancellationTokenSource.Token;
 
-        var bulb1 = (_smartDeviceService.AvailableDevices.Where(ad => ad.Alias.Contains("kitchen light"))).Select(sd => sd as ISmartBulb).ToList();
+        List<ISmartBulb> bulbsToRun = new List<ISmartBulb>();
 
-        this._modeService.RunLavaLampMode(bulb1, this.cancellationToken);
-    }
+        for (int i = 0; i < this._availableBulbs.Count; i++)
+        {
+            if (this._bulbSelection[i])
+            {
+                bulbsToRun.Add(this._availableBulbs[i]);
+            }
+        }
 
-    void StopLavaLampMode()
-    {
-        this.cancellationTokenSource?.Cancel();
+        this._modeService.RunMode(mode, bulbsToRun, this.cancellationToken);
     }
 }

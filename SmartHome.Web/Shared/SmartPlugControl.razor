@@ -30,9 +30,9 @@ else
 
     private void UpdateOnSince(object? state)
     {
-        // Exceptions being throw here; I think the timer + waiting for an async method is problematic
+        // Exceptions being throw here; I think the timer + waiting for an async method is problematic. Commenting out for now
         _onSince = SmartPlug.OnSince.ToLongTimeString();
-        SmartPlug.RefreshAsync().Wait();
+        //SmartPlug.RefreshAsync().Wait();
         InvokeAsync(StateHasChanged);
     }
 }

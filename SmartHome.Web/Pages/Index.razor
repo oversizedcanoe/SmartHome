@@ -7,8 +7,7 @@
 
 @if (_loaded)
 {
-    <p>@_smartDevices.Count devices found!</p>
-    <button @onclick="RefreshDevices">Refresh Device List</button>
+    <button class="btn btn-primary" @onclick="RefreshDevices">Refresh Device List</button>
 
     <div class="row">
         @foreach (var device in _smartDevices)
@@ -46,6 +45,6 @@ else
 
     private void SetSortedDevices()
     {
-        this._smartDevices = this.SmartDeviceService.AvailableDevices.OrderBy(ad => ad.Alias).ToList();
+        this._smartDevices = this.SmartDeviceService.AvailableDevices.OrderBy(ad => ad is ISmartPlug).ThenBy(ad => ad.Alias).ToList();
     }
 }

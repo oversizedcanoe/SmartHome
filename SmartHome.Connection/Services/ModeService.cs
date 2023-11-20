@@ -4,16 +4,49 @@ namespace SmartHome.Connection.Services
 {
     public class ModeService
     {
-        // TODO: I should make one single method called "RunMode" which takes the same params as below plus an enum value for ModeType.
-        // This way the logic of creating tasks etc can be generic.
-        public async void RunLavaLampMode(List<ISmartBulb> bulbs, CancellationToken cancellationToken)
+        public enum Mode
         {
+            None,
+            Lavalamp,
+            Rave,
+            Waves, // Modulate sleep time to make slower and faster changes
+            Normal // set to standard color/brightness
+        }
+
+        public Mode CurrentMode { get; set; } = Mode.None;
+
+        public async void RunMode(Mode mode, List<ISmartBulb> bulbs, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{mode} starting for {bulbs.Count} bulbs");
+
+            cancellationToken.Register(OnCancellationTokenCancelled);
+
             Task[] tasks = new Task[bulbs.Count];
+
+            int hueDifferencePerBulb = 360 / bulbs.Count;
+            int hueOffset = 0;
 
             for (int i = 0; i < bulbs.Count; i++)
             {
-                tasks[i] = FlowThroughColors(bulbs[i], cancellationToken, Configuration.LAVA_LAMP_HUE_STEP, Configuration.LAVA_LAMP_DELAY_TIME_MS);
+                bulbs[i].Hue = hueOffset;
+                hueOffset += hueDifferencePerBulb;
+
+                switch (mode)
+                {
+                    case Mode.Lavalamp:
+                        tasks[i] = FlowThroughColors(bulbs[i], cancellationToken, Configuration.LAVA_LAMP_HUE_STEP, Configuration.LAVA_LAMP_DELAY_TIME_MS);
+                        break;
+                    case Mode.Rave:
+                        tasks[i] = FlowThroughColors(bulbs[i], cancellationToken, Configuration.RAVE_HUE_STEP, Configuration.RAVE_DELAY_TIME_MS);
+                        break;
+                    case Mode.Waves:
+                        throw new NotImplementedException();
+                    default:
+                        break;
+                }
             }
+
+            this.CurrentMode = mode;
 
             // Wait for all tasks to complete
             await Task.WhenAll(tasks);
@@ -68,6 +101,12 @@ namespace SmartHome.Connection.Services
                 currentIterationCount++;
                 await Task.Delay(sleepTimeMs);
             }
+        }
+
+        private void OnCancellationTokenCancelled()
+        {
+            Console.WriteLine($"{this.CurrentMode} canceled");
+            this.CurrentMode = Mode.None;
         }
     }
 }
