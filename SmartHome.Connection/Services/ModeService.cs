@@ -15,28 +15,32 @@ namespace SmartHome.Connection.Services
 
         public Mode CurrentMode { get; set; } = Mode.None;
 
-        public double[] WaveModeSleepCoefficients = new double[Configuration.WAVE_MODE_CYCLE_COUNT];
+        private int[] _waveModeSleepTimesMS = new int[Configuration.WAVE_MODE_WAVE_LENGTH];
+
+        private int _averageSleepTime;
 
         public ModeService()
         {
-            this.InitializeWaveModeValues();
+            this.InitializeWaveModeSleepTimes();
         }
 
-        private void InitializeWaveModeValues()
+        private void InitializeWaveModeSleepTimes()
         {
-            // TODO could use improvement, I want it to modulate faster, also should use constant from Configuration instead of 270 hardcard
+            // Create a sinusoidal wave of sleep times which will modulate the sleep time of the FlowThroughColors method.
+            // y= (coefficient * sin[(2*pi*x)/WAVE_MODE_WAVE_LENGTH]) + offset
 
-            // Create a sinusoidal wave of cofficients which will modulate the sleep time of the FlowThroughColors method.
-            // The coefficients will be applied on a constant equal to Configuration.LAVA_LAMP_DELAY_TIME_MS
-            // The range of coefficients should be from 0.1 to 2; meaning our values range from 10% of the normal delay time to 100%
-            // i.e. slowest sleep time = Normal * 0.1
-            // i.e. longest sleep time = Normal * 2
-            // y= 0.95sin[(2*pi*x)/270] + 1.05
+            double offset = (Configuration.WAVE_MODE_MAX_SLEEP_TIME_MS+ Configuration.WAVE_MODE_MIN_SLEEP_TIME_MS) / 2D;
+            double coefficient = (Configuration.WAVE_MODE_MIN_SLEEP_TIME_MS - Configuration.WAVE_MODE_MAX_SLEEP_TIME_MS) / 2D;
 
-            for (int i = 0; i < Configuration.WAVE_MODE_CYCLE_COUNT; i++)
+            // Total time to complete one cycle is 
+            // WAVE_MODE_WAVE_LENGTH * Average Sleep time, aka WAVE_MODE_WAVE_LENGTH * Offset
+            // This is because wave length is number of points taken
+            // Could change WAVE_MODE_WAVE_LENGTH to be a new Config for "Time for one cycle" as this is more meaningful to the user.
+
+            for (int i = 0; i < Configuration.WAVE_MODE_WAVE_LENGTH; i++)
             {
-                double y = (0.95 * Math.Sin((2 * Math.PI * i) / 270)) + 1.05;
-                this.WaveModeSleepCoefficients[i] = y;
+                int y = (int)Math.Round((coefficient * Math.Sin((2 * Math.PI * i) / Configuration.WAVE_MODE_WAVE_LENGTH)) + offset);
+                this._waveModeSleepTimesMS[i] = y;
             }
         }
 
@@ -127,10 +131,9 @@ namespace SmartHome.Connection.Services
 
                 if (sleepTimeMs == Configuration.MODULATE_SLEEP_TIME_MS)
                 {
-                    double coefficient = this.WaveModeSleepCoefficients[currentIterationCount % Configuration.WAVE_MODE_CYCLE_COUNT];
+                    int modulatedSleepTimeMs = this._waveModeSleepTimesMS[currentIterationCount % Configuration.WAVE_MODE_WAVE_LENGTH];
 
-                    int modulatedSleepTimeMs = (int)Math.Round(Configuration.LAVA_LAMP_DELAY_TIME_MS * coefficient);
-
+                    //Console.WriteLine(new string('.', modulatedSleepTimeMs/2));
                     Console.WriteLine(modulatedSleepTimeMs);
                     await Task.Delay(modulatedSleepTimeMs);
                 }
@@ -138,7 +141,6 @@ namespace SmartHome.Connection.Services
                 {
                     await Task.Delay(sleepTimeMs);
                 }
-
             }
         }
 
