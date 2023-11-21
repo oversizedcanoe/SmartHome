@@ -7,5 +7,7 @@
         public static int LAVA_LAMP_HUE_STEP = 5;
         public static int RAVE_DELAY_TIME_MS = 200;
         public static int RAVE_HUE_STEP = 10;
+        public static int MODULATE_SLEEP_TIME_MS = -1;
+        public static int WAVE_MODE_CYCLE_COUNT = 270;
     }
 }

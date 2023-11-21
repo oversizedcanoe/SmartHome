@@ -99,7 +99,7 @@ namespace SmartHome.Connection.Models
             }
             set
             {
-                Console.WriteLine(value);
+                //Console.WriteLine(value);
                 BulbHSV desiredHSV = new BulbHSV()
                 {
                     Hue = value,

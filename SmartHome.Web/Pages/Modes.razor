@@ -24,8 +24,17 @@
     }
 </div>
 
-<button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Lavalamp)">Lava Lamp Mode</button>
-<button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Rave)">Rave Mode</button>
+@if (_availableBulbs.Any())
+{
+    <button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Lavalamp)">Lava Lamp Mode</button>
+    <button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Rave)">Rave Mode</button>
+    <button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Wave)">Wave Mode</button>
+
+}
+else
+{
+    <p>No suitable bulbs found.</p>
+}
 
 @code {
     private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
