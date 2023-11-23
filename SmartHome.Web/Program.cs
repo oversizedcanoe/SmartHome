@@ -32,7 +32,7 @@ namespace SmartHome.Web
             app.MapFallbackToPage("/_Host");
 
             ISmartDeviceService smartDeviceService = app.Services.GetRequiredService<ISmartDeviceService>();
-            
+
             await smartDeviceService.DiscoverDevices();
 
             app.Run();

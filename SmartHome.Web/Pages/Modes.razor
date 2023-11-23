@@ -13,7 +13,7 @@
 <hr />
 
 <h5>Devices</h5>
-<div class="list-group col-lg-3 pb-3">
+<div class="list-group col-lg-4 pb-3">
 
     @foreach (var bulb in this._availableBulbs)
     {
@@ -26,10 +26,10 @@
 
 @if (_availableBulbs.Any())
 {
-    <button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Lavalamp)">Lava Lamp Mode</button>
-    <button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Rave)">Rave Mode</button>
-    <button type="button" class="btn btn-primary btn-lg" @onclick="() => ToggleMode(Mode.Wave)">Wave Mode</button>
-
+    <button type="button" class="btn btn-primary btn-lg py-2 m-2" @onclick="() => ToggleMode(Mode.Lavalamp)">Lava Lamp</button>
+    <button type="button" class="btn btn-primary btn-lg py-2 m-2" @onclick="() => ToggleMode(Mode.Rave)">Rave</button>
+    <button type="button" class="btn btn-primary btn-lg py-2 m-2" @onclick="() => ToggleMode(Mode.Wave)">Wave</button>
+    <button type="button" class="btn btn-primary btn-lg py-2 m-2" @onclick="() => ToggleMode(Mode.Christmas)">Christmas</button>
 }
 else
 {

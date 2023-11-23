@@ -20,25 +20,28 @@ namespace SmartHome.Connection.Services
         {
             this.AvailableDevices.Clear();
 
+            // Commenting this out for now...somehow the normal functionality works again.
+
             // Get all Wifi IP Addresses which are not Local Area Connection. This may not work everywhere, but my bulbs are on my Wifi IP, not Local Area Connection.
-            var addressesToSearch = NetworkInterface.GetAllNetworkInterfaces()
-                                        .Where(ni => ni.Name.Contains("Local Area Connection", StringComparison.OrdinalIgnoreCase) == false
-                                                  && ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                                        .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
-                                        .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                                        .Select(ip => ip.Address.ToString());
+            //var addressesToSearch = NetworkInterface.GetAllNetworkInterfaces()
+            //                            .Where(ni => ni.Name.Contains("Local Area Connection", StringComparison.OrdinalIgnoreCase) == false
+            //                                      && ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+            //                            .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
+            //                            .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+            //                            .Select(ip => ip.Address.ToString());
 
-            foreach (string address in addressesToSearch)
+            //foreach (string address in addressesToSearch)
+            //{
+            //    string broadcastAddress = address.Substring(0, address.LastIndexOf('.') + 1) + "255";
+            //    List<TPLinkSmartDevice> discoveredDevices = await new TPLinkDiscovery().Discover(target: broadcastAddress);
+            List<TPLinkSmartDevice> discoveredDevices = await new TPLinkDiscovery().Discover();
+
+            foreach (var device in discoveredDevices)
             {
-                string broadcastAddress = address.Substring(0, address.LastIndexOf('.') + 1) + "255";
-                List<TPLinkSmartDevice> discoveredDevices = await new TPLinkDiscovery().Discover(target: broadcastAddress);
-
-                foreach (var device in discoveredDevices)
-                {
-                    device.MessageCache = new NoMessageCache();
-                    this.AvailableDevices.Add(MapToSmartDevice(device));
-                }
+                device.MessageCache = new NoMessageCache();
+                this.AvailableDevices.Add(MapToSmartDevice(device));
             }
+            //}
         }
 
         private ISmartDevice MapToSmartDevice(TPLinkSmartDevice tpLinkDevice)

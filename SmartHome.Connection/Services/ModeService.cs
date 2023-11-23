@@ -10,14 +10,12 @@ namespace SmartHome.Connection.Services
             Lavalamp,
             Rave,
             Wave, // Modulate sleep time to make slower and faster changes
-            Normal // set to standard color/brightness
+            Christmas // Green and Red
         }
 
         public Mode CurrentMode { get; set; } = Mode.None;
 
         private int[] _waveModeSleepTimesMS = new int[Configuration.WAVE_MODE_WAVE_LENGTH];
-
-        private int _averageSleepTime;
 
         public ModeService()
         {
@@ -29,7 +27,7 @@ namespace SmartHome.Connection.Services
             // Create a sinusoidal wave of sleep times which will modulate the sleep time of the FlowThroughColors method.
             // y= (coefficient * sin[(2*pi*x)/WAVE_MODE_WAVE_LENGTH]) + offset
 
-            double offset = (Configuration.WAVE_MODE_MAX_SLEEP_TIME_MS+ Configuration.WAVE_MODE_MIN_SLEEP_TIME_MS) / 2D;
+            double offset = (Configuration.WAVE_MODE_MAX_SLEEP_TIME_MS + Configuration.WAVE_MODE_MIN_SLEEP_TIME_MS) / 2D;
             double coefficient = (Configuration.WAVE_MODE_MIN_SLEEP_TIME_MS - Configuration.WAVE_MODE_MAX_SLEEP_TIME_MS) / 2D;
 
             // Total time to complete one cycle is 
@@ -52,24 +50,36 @@ namespace SmartHome.Connection.Services
 
             Task[] tasks = new Task[bulbs.Count];
 
+            // For randomized colors, we start each bulb an equal hue away from eachother.
             int hueDifferencePerBulb = 360 / bulbs.Count;
             int hueOffset = 0;
 
+            // For two-color option modes, we want to randomize whether it is 1/2/1 or 2/1/2.
+            // We will either set the odd indices to 1, or the even.
+            int oddEvenDecider = new Random().Next(0, 2);
+
             for (int i = 0; i < bulbs.Count; i++)
             {
-                bulbs[i].Hue = hueOffset;
-                hueOffset += hueDifferencePerBulb;
-
                 switch (mode)
                 {
                     case Mode.Lavalamp:
+                        SetBulbHSB(bulbs[i], hueOffset).Wait();
+                        hueOffset += hueDifferencePerBulb;
                         tasks[i] = FlowThroughColors(bulbs[i], cancellationToken, Configuration.LAVA_LAMP_HUE_STEP, Configuration.LAVA_LAMP_DELAY_TIME_MS);
                         break;
                     case Mode.Rave:
+                        SetBulbHSB(bulbs[i], hueOffset).Wait();
+                        hueOffset += hueDifferencePerBulb;
                         tasks[i] = FlowThroughColors(bulbs[i], cancellationToken, Configuration.RAVE_HUE_STEP, Configuration.RAVE_DELAY_TIME_MS);
                         break;
                     case Mode.Wave:
+                        SetBulbHSB(bulbs[i], hueOffset).Wait();
+                        hueOffset += hueDifferencePerBulb;
                         tasks[i] = FlowThroughColors(bulbs[i], cancellationToken, Configuration.LAVA_LAMP_HUE_STEP, Configuration.MODULATE_SLEEP_TIME_MS);
+                        break;
+                    case Mode.Christmas:
+                        int hue = i % 2 == oddEvenDecider ? 120 : 0;
+                        tasks[i] = SetBulbHSB(bulbs[i], hue);
                         break;
                     default:
                         break;
@@ -80,6 +90,10 @@ namespace SmartHome.Connection.Services
 
             // Wait for all tasks to complete
             await Task.WhenAll(tasks);
+
+            // Tasks which go on forever will never hit here and instead will have OnCancellationTokenCancelled called.
+            // Tasks which just set hue will need to have CurrentMode set back to None.
+            this.CurrentMode = Mode.None;
         }
 
         private async Task FlowThroughColors(ISmartBulb bulb, CancellationToken cancellationToken, int step, int sleepTimeMs)
@@ -91,7 +105,7 @@ namespace SmartHome.Connection.Services
 
             // To prevent accidentally generating a really small random interation count, set the min to one quarter of the max.
             int cyclesPerDirectionChange = random.Next(maxNumberOfChangesPerCycle / 4, maxNumberOfChangesPerCycle);
-            
+
             bool increasing = true;
             int currentIterationCount = 0;
 
@@ -142,6 +156,14 @@ namespace SmartHome.Connection.Services
                     await Task.Delay(sleepTimeMs);
                 }
             }
+        }
+
+        private Task SetBulbHSB(ISmartBulb bulb, int hue, int brightness = 100)
+        {
+            Console.WriteLine($"{bulb.Alias} hue/brightness {hue}/{brightness}");
+            bulb.Hue = hue;
+            bulb.Brightness = brightness;
+            return Task.CompletedTask;
         }
 
         private void OnCancellationTokenCancelled()
