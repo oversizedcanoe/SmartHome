@@ -24,7 +24,7 @@
 </div>
 
 <hr />
-<h5>Color (@SmartBulb.Hue)</h5>
+<h5>Color (@SmartBulb.GetHue())</h5>
 <div style="height: 2rem; width:100%; background-color:hsl(@Hue, 100%, 50%)"></div>
 <input type="range" @bind="@Hue" class="form-range" min="0" max="360" @bind:event="oninput">
 <hr />
@@ -39,7 +39,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        _hue = SmartBulb.Hue;
+        _hue = SmartBulb.GetHue();
         _brightness = SmartBulb.Brightness;
     }
 
@@ -58,7 +58,7 @@
         }
         set
         {
-            this.SmartBulb.Hue = value;
+            this.SmartBulb.SetHue(value);
             _delayService.WaitForDeviceToUpdate();
             _hue = value;
         }
@@ -66,7 +66,7 @@
 
     private void OnColorChange()
     {
-        SmartBulb.Hue = _hue;
+        SmartBulb.SetHue(_hue);
     }
 
     private int _brightness { get; set; }

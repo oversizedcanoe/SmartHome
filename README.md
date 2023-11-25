@@ -16,8 +16,8 @@ Functionality I would like to have:
 ### Todo
 - Implement Schedules
 - Implement Configurations -- delay times, set aliases? --> Move this to a CSV so changes made in app are kept for next startup
-- Change the TPLink Library to use the nuget package instead of the local repo clone
-- Figure out how to remove delay from light transitions
 - Bug: Bulb control has a small div to show current bulb color. This works for all colors except "normal" white/yellow ones.
 - Bug: When bulbs change to non-normal colors, brightness display shows 255%+ when it should max out at 100%.
-- Pulse lights to music?
+- Pulse lights to music
+- Show configuration in Web
+- Make a PR to add transition period to SetPoweredOn method for the [library](https://github.com/CodeBardian/tplink-smartdevices-netstandard/tree/master) this repo uses to control the lights -- then I won't need to have a local DLL reference.

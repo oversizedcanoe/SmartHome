@@ -91,24 +91,18 @@ namespace SmartHome.Connection.Models
 
         public bool IsColor => this._bulb.PoweredOn;
 
-        public int Hue
-        {
-            get
-            {
-                return this._bulb.HSV.Hue;
-            }
-            set
-            {
-                //Console.WriteLine(value);
-                BulbHSV desiredHSV = new BulbHSV()
-                {
-                    Hue = value,
-                    Saturation = 100,
-                    Value = 255
-                };
+        public int GetHue() => this._bulb.HSV.Hue;
 
-                this._bulb.SetHSV(desiredHSV, Configuration.HUE_CHANGE_TRANSITION_TIME_MS);
-            }
+        public void SetHue(int hue, int transitionTime = 250)
+        {
+            BulbHSV desiredHSV = new BulbHSV()
+            {
+                Hue = hue,
+                Saturation = 100,
+                Value = 255
+            };
+
+            this._bulb.SetHSV(desiredHSV, transitionTime);
         }
     }
 }

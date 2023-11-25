@@ -10,7 +10,8 @@ namespace SmartHome.Connection.Services
             Lavalamp,
             Rave,
             Wave, // Modulate sleep time to make slower and faster changes
-            Christmas // Green and Red
+            Christmas, // Green and Red
+            Flash
         }
 
         public Mode CurrentMode { get; set; } = Mode.None;
@@ -81,6 +82,9 @@ namespace SmartHome.Connection.Services
                         int hue = i % 2 == oddEvenDecider ? 120 : 0;
                         tasks[i] = SetBulbHSB(bulbs[i], hue);
                         break;
+                    case Mode.Flash:
+                        tasks[i] = FlashRandomColors(bulbs[i], cancellationToken);
+                        break;
                     default:
                         break;
                 }
@@ -119,25 +123,25 @@ namespace SmartHome.Connection.Services
                 if (increasing)
                 {
                     // Hue can be between 0-360.
-                    if (bulb.Hue <= (360 - step))
+                    if (bulb.GetHue() <= (360 - step))
                     {
-                        bulb.Hue += step;
+                        bulb.SetHue(bulb.GetHue() + step);
                     }
                     else
                     {
-                        bulb.Hue = 0;
+                        bulb.SetHue(0);
                     }
                 }
                 else
                 {
                     // Hue can be between 0-360.
-                    if (bulb.Hue >= step)
+                    if (bulb.GetHue() >= step)
                     {
-                        bulb.Hue -= step;
+                        bulb.SetHue(bulb.GetHue() - step);
                     }
                     else
                     {
-                        bulb.Hue = 360;
+                        bulb.SetHue(360);
                     }
                 }
 
@@ -158,10 +162,24 @@ namespace SmartHome.Connection.Services
             }
         }
 
+        private async Task FlashRandomColors(ISmartBulb bulb, CancellationToken cancellationToken)
+        {
+            Random random = new Random();
+
+            while (cancellationToken.IsCancellationRequested == false)
+            {
+                int randomHue = random.Next(0, 360);
+                Console.WriteLine(randomHue);
+                bulb.SetHue(randomHue, 0);
+                bulb.On = true;
+                await Task.Delay(Configuration.FLASH_SLEEP_TIME_MS);
+                bulb.On = false;
+            }
+        }
+
         private Task SetBulbHSB(ISmartBulb bulb, int hue, int brightness = 100)
         {
-            Console.WriteLine($"{bulb.Alias} hue/brightness {hue}/{brightness}");
-            bulb.Hue = hue;
+            bulb.SetHue(hue);
             bulb.Brightness = brightness;
             return Task.CompletedTask;
         }

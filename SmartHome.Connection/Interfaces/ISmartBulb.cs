@@ -13,6 +13,7 @@ namespace SmartHome.Connection.Interfaces
         public int Brightness { get; set; }
 
         public bool IsColor { get; }
-        public int Hue { get; set; }
+        public int GetHue();
+        public void SetHue(int hue, int transitionTime = 250);
     }
 }
