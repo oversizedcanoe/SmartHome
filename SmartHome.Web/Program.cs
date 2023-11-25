@@ -1,5 +1,7 @@
+using Serilog;
 using SmartHome.Connection.Interfaces;
 using SmartHome.Connection.Services;
+using System.Reflection;
 
 namespace SmartHome.Web
 {
@@ -8,6 +10,17 @@ namespace SmartHome.Web
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            string currentDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
+
+            Log.Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .WriteTo.File($"{currentDirectory}\\logs\\SmartHome.txt",
+                        rollingInterval: RollingInterval.Day,
+                        rollOnFileSizeLimit: true)
+                    .CreateLogger();
+
+            Log.Logger.Information("Application starting.");
 
             // Add services to the container.
             builder.Services.AddRazorPages();
@@ -35,7 +48,15 @@ namespace SmartHome.Web
 
             await smartDeviceService.DiscoverDevices();
 
-            app.Run();
+            try
+            {
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Fatal("An exception occurred, shutting down!");
+                Log.Logger.Fatal(ex.ToString());
+            }
         }
     }
 }

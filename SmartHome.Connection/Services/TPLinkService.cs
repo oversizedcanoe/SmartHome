@@ -1,4 +1,5 @@
-﻿using SmartHome.Connection.Interfaces;
+﻿using Serilog;
+using SmartHome.Connection.Interfaces;
 using SmartHome.Connection.Models;
 using System.Diagnostics;
 using System.Net;
@@ -18,30 +19,43 @@ namespace SmartHome.Connection.Services
 
         public async Task DiscoverDevices()
         {
+            Log.Logger.Information("Discovering devices...");
             this.AvailableDevices.Clear();
+            List<TPLinkSmartDevice> discoveredDevices = new List<TPLinkSmartDevice>();
 
-            // Commenting this out for now...somehow the normal functionality works again.
+            if (Configuration.USE_BROADCAST_ADDRESS)
+            {
+                Log.Logger.Information("Using broadcast IP address (255.255.255.255)");
 
-            // Get all Wifi IP Addresses which are not Local Area Connection. This may not work everywhere, but my bulbs are on my Wifi IP, not Local Area Connection.
-            //var addressesToSearch = NetworkInterface.GetAllNetworkInterfaces()
-            //                            .Where(ni => ni.Name.Contains("Local Area Connection", StringComparison.OrdinalIgnoreCase) == false
-            //                                      && ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-            //                            .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
-            //                            .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-            //                            .Select(ip => ip.Address.ToString());
+                discoveredDevices = await new TPLinkDiscovery().Discover();
+            }
+            else
+            {
 
-            //foreach (string address in addressesToSearch)
-            //{
-            //    string broadcastAddress = address.Substring(0, address.LastIndexOf('.') + 1) + "255";
-            //    List<TPLinkSmartDevice> discoveredDevices = await new TPLinkDiscovery().Discover(target: broadcastAddress);
-            List<TPLinkSmartDevice> discoveredDevices = await new TPLinkDiscovery().Discover();
+                //Get all Wifi IP Addresses which are not Local Area Connection.This may not work everywhere, but my bulbs are on my Wifi IP, not Local Area Connection.
+                var addressesToSearch = NetworkInterface.GetAllNetworkInterfaces()
+                                            .Where(ni => ni.Name.Contains("Local Area Connection", StringComparison.OrdinalIgnoreCase) == false
+                                                      && ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+                                            .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
+                                            .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                                            .Select(ip => ip.Address.ToString());
+
+                Log.Logger.Information($"Using IP address(es): {string.Join(", ", addressesToSearch)}");
+
+                foreach (string address in addressesToSearch)
+                {
+                    string broadcastAddress = address.Substring(0, address.LastIndexOf('.') + 1) + "255";
+                    discoveredDevices.AddRange(await new TPLinkDiscovery().Discover(target: broadcastAddress));
+                }
+            }
+
+            Log.Logger.Information($"{discoveredDevices.Count} devices found.");
 
             foreach (var device in discoveredDevices)
             {
                 device.MessageCache = new NoMessageCache();
                 this.AvailableDevices.Add(MapToSmartDevice(device));
             }
-            //}
         }
 
         private ISmartDevice MapToSmartDevice(TPLinkSmartDevice tpLinkDevice)

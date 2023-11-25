@@ -16,5 +16,7 @@
         public static int WAVE_MODE_MIN_SLEEP_TIME_MS = 150;
         public static int WAVE_MODE_MAX_SLEEP_TIME_MS = 600;
 
+        public static bool USE_BROADCAST_ADDRESS = false;
+
     }
 }
