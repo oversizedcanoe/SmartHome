@@ -169,7 +169,6 @@ namespace SmartHome.Connection.Services
             while (cancellationToken.IsCancellationRequested == false)
             {
                 int randomHue = random.Next(0, 360);
-                Console.WriteLine(randomHue);
                 bulb.SetHue(randomHue, 0);
                 bulb.On = true;
                 await Task.Delay(Configuration.FLASH_SLEEP_TIME_MS);
