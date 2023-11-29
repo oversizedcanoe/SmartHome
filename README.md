@@ -2,6 +2,8 @@
 
 This repo is going to be similar to my [other smart home repo](https://github.com/oversizedcanoe/party-lights), but in DotNet. I find working with threading and async/await much easier in C# than it is in Python, and C# is my preferred language.
 
+Note that the SmartHome.Connection project references a local dll, which is [this repo](https://github.com/oversizedcanoe/tplink-smartdevices-netstandard), which is a fork with a small tweak to remove the transition period when setting a bulbs power off.
+
 Functionality I would like to have: 
 - Turn plugs and lights on and off
 - Set color and brightness of lights, if able to (UI should prevent user from setting if the light does not support it)
@@ -20,4 +22,3 @@ Functionality I would like to have:
 - Bug: When bulbs change to non-normal colors, brightness display shows 255%+ when it should max out at 100%.
 - Pulse lights to music
 - Show configuration in Web
-- Make a PR to add transition period to SetPoweredOn method for the [library](https://github.com/CodeBardian/tplink-smartdevices-netstandard/tree/master) this repo uses to control the lights -- then I won't need to have a local DLL reference.
